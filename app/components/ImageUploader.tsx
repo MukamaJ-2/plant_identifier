@@ -1,8 +1,15 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import Image from 'next/image';
-import { FaUpload, FaLeaf, FaInfoCircle, FaTable, FaImage, FaQuestionCircle } from 'react-icons/fa';
+import Image from "next/image";
+import {
+  FaUpload,
+  FaLeaf,
+  FaInfoCircle,
+  FaTable,
+  FaImage,
+  FaQuestionCircle,
+} from "react-icons/fa";
 
 const API_KEY = "AIzaSyBIzs1i9qgEESHBjUyFHzfiy7gj03ZntdY";
 
@@ -10,33 +17,38 @@ const ImageUploader: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [plantInfo, setPlantInfo] = useState<string | null>(null);
-  const [plantDetails, setPlantDetails] = useState<{ [key: string]: string } | null>(null);
+  const [plantDetails, setPlantDetails] = useState<{
+    [key: string]: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      setImageUrl(URL.createObjectURL(file));
-      setPlantInfo(null);
-      setPlantDetails(null);
-      setLoading(true);
+  const handleImageUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setImage(file);
+        setImageUrl(URL.createObjectURL(file));
+        setPlantInfo(null);
+        setPlantDetails(null);
+        setLoading(true);
 
-      try {
-        const imageData = await fileToGenerativePart(file);
-        const result = await identifyPlant(imageData);
+        try {
+          const imageData = await fileToGenerativePart(file);
+          const result = await identifyPlant(imageData);
 
-        const { description, tableData } = parsePlantDetails(result);
-        setPlantInfo(description);
-        setPlantDetails(tableData);
-      } catch (error) {
-        console.error('Error identifying plant:', error);
-        setPlantInfo('Error identifying plant. Please try again.');
-      } finally {
-        setLoading(false);
+          const { description, tableData } = parsePlantDetails(result);
+          setPlantInfo(description);
+          setPlantDetails(tableData);
+        } catch (error) {
+          console.error("Error identifying plant:", error);
+          setPlantInfo("Error identifying plant. Please try again.");
+        } finally {
+          setLoading(false);
+        }
       }
-    }
-  }, []);
+    },
+    [],
+  );
 
   const fileToGenerativePart = async (file: File) => {
     const base64EncodedDataPromise = new Promise((resolve) => {
@@ -71,16 +83,19 @@ const ImageUploader: React.FC = () => {
   };
 
   const parsePlantDetails = (text: string) => {
-    const [description, tableText] = text.split('Table:');
-    const tableLines = tableText.trim().split('\n');
+    const [description, tableText] = text.split("Table:");
+    const tableLines = tableText.trim().split("\n");
     const tableData: { [key: string]: string } = {};
-    tableLines.forEach(line => {
-      const [key, value] = line.split(':');
+    tableLines.forEach((line) => {
+      const [key, value] = line.split(":");
       if (key && value) {
         tableData[key.trim()] = value.trim();
       }
     });
-    return { description: description.replace('Description:', '').trim(), tableData };
+    return {
+      description: description.replace("Description:", "").trim(),
+      tableData,
+    };
   };
 
   return (
@@ -109,7 +124,11 @@ const ImageUploader: React.FC = () => {
   );
 };
 
-const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
+const FeatureCard: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}> = ({ icon, title, description }) => (
   <div className="bg-gray-800 rounded-lg p-4 flex flex-col items-center text-center">
     <div className="text-3xl mb-2 text-green-400">{icon}</div>
     <h3 className="text-lg font-semibold mb-2">{title}</h3>
